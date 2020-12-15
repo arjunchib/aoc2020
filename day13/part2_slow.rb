@@ -1,23 +1,31 @@
 class BusScheduler
   def initialize(input)
-    @buses = input.split(',').map do |i|
-      i == 'x' ? Float::INFINITY : i.to_i
+    @buses = {}
+    @last_bus = nil
+    terms = input.split(',')
+    terms.each_with_index do |term, i|
+      value = term.to_i
+      if i == terms.length - 1
+        @last_bus = value
+      elsif term != 'x'
+        diff = terms.length - i - 1
+        @buses[value] = diff % value
+      end
     end
   end
 
-  def valid?(buses)
-    buses.each_with_index.all? do |bus, index|
-      bus == Float::INFINITY || buses.first + index == bus
+  def valid?(term)
+    @buses.each.all? do |key, value|
+      term % key == value
     end
   end
 
   def process
-    buses = @buses.dup
-    while !valid?(buses) do
-      min, index = buses.each_with_index.min {|a, b| (a[0] - a[1]) <=> (b[0] - b[1]) }
-      buses[index] += @buses[index]
+    i = @last_bus
+    while !valid?(i) do
+      i += @last_bus
     end
-    buses.first
+    i - @buses.values.max
   end
 end
 
@@ -29,5 +37,5 @@ p BusScheduler.new('67,7,59,61').process
 p BusScheduler.new('67,x,7,59,61').process
 p BusScheduler.new('67,7,x,59,61').process
 p BusScheduler.new('1789,37,47,1889').process
-p BusScheduler.new(input).process
+# p BusScheduler.new(input).process
 
